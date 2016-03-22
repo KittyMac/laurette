@@ -84,11 +84,7 @@ public class Laurette {
 
 			} else {
 				if (isStart) {
-					if(depth == 0){
-						sb.AppendFormat ("public class {0} {{\n", branch.Name);
-					}else{
-						sb.AppendFormat ("public struct {0} {{\n", branch.Name);
-					}
+					sb.AppendFormat ("public struct {0} {{\n", branch.Name);
 
 					// Create the LanguageCode enum
 					if(depth == 0) {
