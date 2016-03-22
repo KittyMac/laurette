@@ -71,41 +71,16 @@ public class Laurette {
 				sb.AppendFormat ("public static string {0} {{\n", branch.Name);
 
 				depth++;
-				AddTabs(sb, depth);
-				sb.AppendFormat ("get {{\n");
+				AppendTabFormat(sb, depth, "get {{\n");
 
 				depth++;
-
-				AddTabs(sb, depth);
-				sb.AppendFormat ("string[] translations = new string[] {{\n");
-
-				depth++;
-				foreach(string languageCode in tree.AllLanguageCodes) {
-					string value = branch.Translate(languageCode);
-					if(value == null) {
-						AddTabs(sb, depth);
-						sb.AppendFormat ("null,\n");
-					}else{
-						AddTabs(sb, depth);
-						sb.AppendFormat ("\"{0}\",\n", value);
-					}
-				}
-				depth--;
-
-				AddTabs(sb, depth);
-				sb.AppendFormat ("}};\n");
-
-				AddTabs(sb, depth);
-				sb.AppendFormat ("return translations[(int)currentLanguage];\n");
+				AppendTabFormat(sb, depth, "return {0}[(int)currentLanguage];\n", branch.Path);
 
 				depth--;
-
-				AddTabs(sb, depth);
-				sb.AppendFormat ("}}\n");
+				AppendTabFormat(sb, depth, "}}\n");
 
 				depth--;
-				AddTabs(sb, depth);
-				sb.AppendFormat ("}}\n");
+				AppendTabFormat(sb, depth, "}}\n");
 
 			} else {
 				if (isStart) {
@@ -119,21 +94,21 @@ public class Laurette {
 					if(depth == 0) {
 						depth++;
 
-						AddTabs(sb, depth);
-						sb.AppendFormat ("public enum LanguageCode {{\n");
+						AppendTabFormat(sb, depth, "public enum LanguageCode {{\n");
 
 						depth++;
 						foreach(string languageCode in tree.AllLanguageCodes) {
-							AddTabs(sb, depth);
-							sb.AppendFormat ("{0},\n", languageCode);
+							AppendTabFormat(sb, depth, "{0},\n", languageCode);
 						}
 						depth--;
 
-						AddTabs(sb, depth);
-						sb.AppendFormat ("}};\n\n");
+						AppendTabFormat(sb, depth, "}}\n\n");
 
-						AddTabs(sb, depth);
-						sb.AppendFormat ("public static LanguageCode currentLanguage = LanguageCode.{0};\n\n", tree.AllLanguageCodes[0]);
+						AppendTabFormat(sb, depth, "private static LanguageCode currentLanguage = LanguageCode.{0};\n\n", tree.AllLanguageCodes[0]);
+
+						AppendTabFormat(sb, depth, "public static void SetLanguageCode(LanguageCode code) {{ currentLanguage = code; }}\n\n");
+
+						AppendTabFormat(sb, depth, "public static void SetLanguageCode(string codeAsString) {{ currentLanguage = (LanguageCode)System.Enum.Parse(typeof(LanguageCode), codeAsString); }}\n\n");
 
 						depth--;
 					}
@@ -144,9 +119,38 @@ public class Laurette {
 			}
 		});
 
+
+		sb.Length = sb.Length - 2;
+		sb.AppendFormat ("\n\n\n");
+
+		tree.Traverse ((branch2, isStart2, isLeaf2, depth2) => {
+
+			if (isLeaf2) {
+				AppendTabFormat (sb, 1, "static readonly string[] {0} = new string[] {{\n", branch2.Path);
+
+				foreach (string languageCode in tree.AllLanguageCodes) {
+					string value = branch2.Translate (languageCode);
+					if (value == null) {
+						AppendTabFormat (sb, 2, "null,\n");
+					} else {
+						AppendTabFormat (sb, 2, "\"{0}\",\n", value);
+					}
+				}
+
+				AppendTabFormat (sb, 1, "}};\n");
+			}
+		});
+
+		sb.AppendFormat ("}}");
+
 		File.WriteAllText (outputFile, sb.ToString ());
 
 		return true;
+	}
+
+	private void AppendTabFormat(StringBuilder sb, int depth, string format, params string[] args){
+		AddTabs (sb, depth);
+		sb.AppendFormat (format, args);
 	}
 
 	private void AddTabs(StringBuilder sb, int depth){
@@ -166,8 +170,9 @@ public class Laurette {
 			return false;
 		}
 
-		// todo: extract the language code from the path
-		string languageCode = "en";
+
+		// extract the two-character language code from the path; it should be the directory the .strings file it in
+		string languageCode = Path.GetFileName(Path.GetDirectoryName(filePath));
 
 		// 1) Process the strings file, pulling out all of the key-value pairs
 		MatchCollection matches = Regex.Matches (stringsFileAsString, "\"([^\"]+)\"\\s*=\\s*\"([^\"]+)\"");
@@ -216,7 +221,7 @@ public class LauretteTree {
 	private List<string> allLanguageCodes = new List<string>();
 
 	public LauretteTree() {
-		root = new LauretteBranch ("Localizations");
+		root = new LauretteBranch ("Localizations", null, 0);
 	}
 
 	public List<string> AllLanguageCodes {
@@ -245,6 +250,7 @@ public class LauretteBranch {
 
 	private Dictionary<string,LauretteBranch> branches = new Dictionary<string,LauretteBranch>();
 	private string name;
+	private string path;
 
 	private Dictionary<string,string> translations = new Dictionary<string,string>();
 
@@ -255,14 +261,29 @@ public class LauretteBranch {
 		}
 	}
 
+	public string Path {
+		get {
+			return path;
+		}
+	}
+
 	public Dictionary<string,string> Translations {
 		get {
 			return new Dictionary<string,string> (translations);
 		}
 	}
 
-	public LauretteBranch(string name) {
+	public LauretteBranch(string name, string[] keys, int keyIdx) {
 		this.name = name;
+
+		if (keys != null) {
+			StringBuilder sb = new StringBuilder ();
+			for (int i = 0; i < keyIdx; i++) {
+				sb.Append (keys [i]);
+				sb.Append ("_");
+			}
+			path = sb.ToString ();
+		}
 	}
 
 	public void AddTranslation(string value, string languageCode){
@@ -301,7 +322,8 @@ public class LauretteBranch {
 			return branches [key].TraverseAndAddBranches (keyPaths, idx + 1);
 		}
 
-		branches [key] = new LauretteBranch (key);
+
+		branches [key] = new LauretteBranch (key, keyPaths, idx + 1);
 		return branches [key].TraverseAndAddBranches (keyPaths, idx + 1);
 	}
 }
