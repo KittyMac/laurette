@@ -188,6 +188,12 @@ public class Laurette {
 			while (key.Contains ("..")) {
 				key = key.Replace ("..", ".");
 			}
+				
+			for (char i = (char)0; i < (char)128; i++) {
+				if (Char.IsLetter (i) == false) {
+					key = key.Replace (""+i, "_");
+				}
+			}
 
 			string[] parts = key.Split (".".ToCharArray ());
 			for (int i = 0; i < parts.Length; i++) {

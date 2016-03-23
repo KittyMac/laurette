@@ -2,25 +2,40 @@
 using UnityEditor;
 using System.Collections.Generic;
 
-public class LauretteBuildProcess : MonoBehaviour {
+public class LauretteBuildProcess : AssetPostprocessor  {
 
 	private static string OutputDirectory = "Assets/Code/";
-	
-	[MenuItem ("Laurette/Process All")]
-	static void ProcessAllStringsFiles() {
-		Laurette laurette = new Laurette ();
 
-		string[] allAssets = AssetDatabase.GetAllAssetPaths();
-		List<string> allStringsFiles = new List<string> ();
+	static void OnPostprocessAllAssets (string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+	{
+		bool stringsFileWasChanged = false;
 
-		foreach (string asset in allAssets) {
-			if (asset.EndsWith (".strings")) {
-				allStringsFiles.Add (asset);
-			}
+		foreach (string str in importedAssets) {
+			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings");
+		}
+		foreach (string str in deletedAssets) {
+			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings");
 		}
 
-		string error = null;
-		laurette.Process (allStringsFiles.ToArray(), OutputDirectory+"/Localizations.cs", out error);
+		for (var i = 0; i < movedAssets.Length; i++) {
+			stringsFileWasChanged = stringsFileWasChanged | movedAssets [i].EndsWith (".strings");
+			stringsFileWasChanged = stringsFileWasChanged | movedFromAssetPaths [i].EndsWith (".strings");
+		}
+
+		if (stringsFileWasChanged) {
+			Laurette laurette = new Laurette ();
+
+			string[] allAssets = AssetDatabase.GetAllAssetPaths();
+			List<string> allStringsFiles = new List<string> ();
+
+			foreach (string asset in allAssets) {
+				if (asset.EndsWith (".strings") || asset.EndsWith (".strings.txt")) {
+					allStringsFiles.Add (asset);
+				}
+			}
+
+			string error = null;
+			laurette.Process (allStringsFiles.ToArray(), OutputDirectory+"/Localizations.cs", out error);
+		}
 	}
-	
 }
