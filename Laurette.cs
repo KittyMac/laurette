@@ -68,19 +68,59 @@ public class Laurette {
 
 			if(isLeaf){
 
-				sb.AppendFormat ("public static string {0} {{\n", branch.Name);
+				bool isFormatString = false;
+				int numArguments = 0;
 
-				depth++;
-				AppendTabFormat(sb, depth, "get {{\n");
+				foreach (string languageCode in tree.AllLanguageCodes) {
+					string value = branch.Translate(languageCode);
+					if(value.Contains("{0}")) {
+						isFormatString = true;
 
-				depth++;
-				AppendTabFormat(sb, depth, "return {0}[(int)currentLanguage];\n", branch.Path);
+						while(value.Contains("{"+numArguments+"}")) {
+							numArguments++;
+						}
 
-				depth--;
-				AppendTabFormat(sb, depth, "}}\n");
+						break;
+					}
+				}
 
-				depth--;
-				AppendTabFormat(sb, depth, "}}\n");
+				if(isFormatString){
+
+
+					StringBuilder formatString = new StringBuilder();
+					StringBuilder argsString = new StringBuilder();
+					for(int i = 0; i < numArguments; i++){
+						formatString.Append(string.Format("object arg{0}, ", i));
+						argsString.Append(string.Format("arg{0}, ", i));
+					}
+					formatString.Length = formatString.Length-2;
+					argsString.Length = argsString.Length-2;
+
+					sb.AppendFormat ("public static string {0}({1}) {{\n", branch.Name, formatString.ToString());
+
+					depth++;
+					AppendTabFormat(sb, depth, "return string.Format({0}[(int)currentLanguage], {1});\n", branch.Path, argsString.ToString());
+
+					depth--;
+					AppendTabFormat(sb, depth, "}}\n");
+
+				}else{
+					sb.AppendFormat ("public static string {0} {{\n", branch.Name);
+
+					depth++;
+					AppendTabFormat(sb, depth, "get {{\n");
+
+					depth++;
+					AppendTabFormat(sb, depth, "return {0}[(int)currentLanguage];\n", branch.Path);
+
+					depth--;
+					AppendTabFormat(sb, depth, "}}\n");
+
+					depth--;
+					AppendTabFormat(sb, depth, "}}\n");
+				}
+
+
 
 			} else {
 				if (isStart) {
@@ -126,11 +166,7 @@ public class Laurette {
 
 				foreach (string languageCode in tree.AllLanguageCodes) {
 					string value = branch2.Translate (languageCode);
-					if (value == null) {
-						AppendTabFormat (sb, 2, "null,\n");
-					} else {
-						AppendTabFormat (sb, 2, "\"{0}\",\n", value);
-					}
+					AppendTabFormat (sb, 2, "\"{0}\",\n", value);
 				}
 
 				AppendTabFormat (sb, 1, "}};\n");
@@ -190,7 +226,7 @@ public class Laurette {
 			}
 				
 			for (char i = (char)0; i < (char)128; i++) {
-				if (Char.IsLetter (i) == false) {
+				if (Char.IsLetter (i) == false && i != '.') {
 					key = key.Replace (""+i, "_");
 				}
 			}
@@ -296,7 +332,10 @@ public class LauretteBranch {
 
 	public string Translate(string languageCode){
 		if (translations.ContainsKey (languageCode) == false) {
-			return null;
+			if (translations.ContainsKey ("en") == false) {
+				return "";
+			}
+			return Translate ("en");
 		}
 		return translations [languageCode];
 	}
