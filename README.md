@@ -43,6 +43,11 @@ Laurette will generate nested structures for language keys which follow a dot-se
 
 ```C#
 public struct Localizations {
+	public enum LanguageCode {
+		ru,
+		en,
+	}
+	
 	public struct Monsters {
 		/// <summary>English: "Goblins"</summary>
 		public static string Goblins {
@@ -51,12 +56,23 @@ public struct Localizations {
 			}
 		}
 	}
+	
+	static readonly string[] Monsters_Goblins_ = new string[] {
+		"Goblins",
+		"гоблины",
+	};
 }
 ```
 
 ## Embedded Strings
 
 There are dozens of different method for localizing content in Unity3D; just [search on the Asset Store.](https://www.assetstore.unity3d.com/en/#!/search/page=1/sortby=relevance/query=localization).  To make Laurette as lean, mean, and performant as possible,  Laurette will compile the translated strings directly into the main Localizations structure.  Translation lookups are then as quick as a single static string array access.
+
+## Directory Structure
+
+Laurette supports a standard directory structure for .strings file placements; put the .strings files in a directory which is named the language code for that language. All of the languages found will be compiled into an enum called LanguageCode in the Localization structure.
+
+![Image : Directory Structure](https://raw.githubusercontent.com/KittyMac/laurette/master/image3.png)
 
 
 ##Licence
