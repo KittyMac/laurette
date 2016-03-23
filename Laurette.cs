@@ -171,23 +171,25 @@ public class Laurette {
 		string languageCode = Path.GetFileName(Path.GetDirectoryName(filePath));
 
 		// 1) Process the strings file, pulling out all of the key-value pairs
-		MatchCollection matches = Regex.Matches (stringsFileAsString, "\"([^\"]+)\"\\s*=\\s*\"([^\"]+)\"");
+		// old, doesn't handle escaped quotes: "\"([^\"]+)\"\\s*=\\s*\"([^\"]+)\""
+		// new, handles escaped quotes: "([^"]+)"\s*=\s((?<![\\])['"])((?:.(?!(?<![\\])\2))*.?)\2;
+		MatchCollection matches = Regex.Matches (stringsFileAsString, "\"([^\"]+)\"\\s*=\\s((?<![\\\\])['\"])((?:.(?!(?<![\\\\])\\2))*.?)\\2;");
 		foreach (Match match in matches) {
 
-			string value = match.Groups [1].Value;
-			string key = match.Groups [2].Value;
+			string value = match.Groups [3].Value;
+			string key = match.Groups [1].Value;
 
 			// handle special cases for the value before processing:
-			value = value.Trim (".".ToCharArray ());
+			key = key.Trim (".".ToCharArray ());
 
-			while (value.Contains (" ")) {
-				value = value.Replace (" ", "_");
+			while (key.Contains (" ")) {
+				key = key.Replace (" ", "_");
 			}
-			while (value.Contains ("..")) {
-				value = value.Replace ("..", ".");
+			while (key.Contains ("..")) {
+				key = key.Replace ("..", ".");
 			}
 
-			string[] parts = value.Split (".".ToCharArray ());
+			string[] parts = key.Split (".".ToCharArray ());
 			for (int i = 0; i < parts.Length; i++) {
 				string part = parts [i];
 				if (Char.IsLetter (part, 0) == false) {
@@ -200,9 +202,9 @@ public class Laurette {
 
 				parts [i] = part;
 			}
-			value = string.Join (".", parts);
+			key = string.Join (".", parts);
 
-			tree.Add (value, key, languageCode);
+			tree.Add (key, value, languageCode);
 		}
 
 		return true;
