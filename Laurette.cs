@@ -64,8 +64,6 @@ public class Laurette {
 
 		tree.Traverse ((branch, isStart, isLeaf, depth) => {
 
-			AddTabs(sb, depth);
-
 			if(isLeaf){
 
 				bool isFormatString = false;
@@ -86,7 +84,6 @@ public class Laurette {
 
 				if(isFormatString){
 
-
 					StringBuilder formatString = new StringBuilder();
 					StringBuilder argsString = new StringBuilder();
 					for(int i = 0; i < numArguments; i++){
@@ -96,7 +93,8 @@ public class Laurette {
 					formatString.Length = formatString.Length-2;
 					argsString.Length = argsString.Length-2;
 
-					sb.AppendFormat ("public static string {0}({1}) {{\n", branch.Name, formatString.ToString());
+					AppendTabFormat(sb, depth, "/// <summary>English: \"{0}\"</summary>\n", branch.Translate("en"));
+					AppendTabFormat(sb, depth, "public static string {0}({1}) {{\n", branch.Name, formatString.ToString());
 
 					depth++;
 					AppendTabFormat(sb, depth, "return string.Format({0}[(int)currentLanguage], {1});\n", branch.Path, argsString.ToString());
@@ -104,8 +102,12 @@ public class Laurette {
 					depth--;
 					AppendTabFormat(sb, depth, "}}\n");
 
+
 				}else{
-					sb.AppendFormat ("public static string {0} {{\n", branch.Name);
+
+
+					AppendTabFormat(sb, depth, "/// <summary>English: \"{0}\"</summary>\n", branch.Translate("en"));
+					AppendTabFormat(sb, depth, "public static string {0} {{\n", branch.Name);
 
 					depth++;
 					AppendTabFormat(sb, depth, "get {{\n");
@@ -120,11 +122,9 @@ public class Laurette {
 					AppendTabFormat(sb, depth, "}}\n");
 				}
 
-
-
 			} else {
 				if (isStart) {
-					sb.AppendFormat ("public struct {0} {{\n", branch.Name);
+					AppendTabFormat(sb, depth, "public struct {0} {{\n", branch.Name);
 
 					// Create the LanguageCode enum
 					if(depth == 0) {
@@ -150,7 +150,7 @@ public class Laurette {
 					}
 
 				} else {
-					sb.AppendFormat ("}}\n");
+					AppendTabFormat(sb, depth, "}}\n");
 				}
 			}
 		});
