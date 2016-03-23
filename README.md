@@ -59,6 +59,8 @@ public struct Localizations {
 There are dozens of different method for localizing content in Unity3D; just [search on the Asset Store.](https://www.assetstore.unity3d.com/en/#!/search/page=1/sortby=relevance/query=localization).  To make Laurette as lean, mean, and performant as possible,  Laurette will compile the translated strings directly into the main Localizations structure.  Translation lookups are then a single static string[] access; not need for resource loading, caching, or whatnot.
 
 
+##Licence
+
 The MIT License (MIT)
 
 Copyright (c) 2016 Rocco Bowling
