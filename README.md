@@ -21,7 +21,7 @@ can now be accessed from code by:
 buttonLabel.text = Localizations.MainMenu.PlayButton.Title;
 ```
 
-![Image : Autocomplete Summaries]()
+![Image : Autocomplete Variables](https://raw.githubusercontent.com/KittyMac/laurette/master/image1.png)
 
 
 Laurette will also properly detect format strings, and provide built-in methods for them:
@@ -34,7 +34,7 @@ Laurette will also properly detect format strings, and provide built-in methods 
 gameOverField.text = Localizations.GameOver.ScoreField.Title (5, Localizations.Monsters.Goblins);
 ```
 
-![Image : Autocomplete Summaries]()
+![Image : Autocomplete Methods](https://raw.githubusercontent.com/KittyMac/laurette/master/image2.png)
 
 
 ## Nested Structures
