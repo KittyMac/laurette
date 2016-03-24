@@ -95,7 +95,7 @@ public class Laurette {
 					formatString.Length = formatString.Length-2;
 					argsString.Length = argsString.Length-2;
 
-					AppendTabFormat(sb, depth, "/// <summary>English: \"{0}\"</summary>\n", branch.Translate("en"));
+					AppendTabFormat(sb, depth, "/// <summary>English: \"{0}\"</summary>\n", branch.Translate("en").Replace("\n", "\\n").Replace("\r", "\\r"));
 					AppendTabFormat(sb, depth, "public static string {0}({1}) {{\n", branch.Name, formatString.ToString());
 
 					depth++;
@@ -108,7 +108,7 @@ public class Laurette {
 				}else{
 
 
-					AppendTabFormat(sb, depth, "/// <summary>English: \"{0}\"</summary>\n", branch.Translate("en"));
+					AppendTabFormat(sb, depth, "/// <summary>English: \"{0}\"</summary>\n", branch.Translate("en").Replace("\n", "\\n").Replace("\r", "\\r"));
 					AppendTabFormat(sb, depth, "public static string {0} {{\n", branch.Name);
 
 					depth++;
@@ -185,7 +185,7 @@ public class Laurette {
 				AppendTabFormat (sb, 1, "static readonly string[] {0} = new string[] {{\n", branch2.Path);
 
 				foreach (string languageCode in tree.AllLanguageCodes) {
-					string value = branch2.Translate (languageCode);
+					string value = branch2.Translate (languageCode).Replace("\n", "\\n").Replace("\r", "\\r");
 					AppendTabFormat (sb, 2, "\"{0}\",\n", value);
 				}
 
@@ -226,10 +226,11 @@ public class Laurette {
 		// extract the two-character language code from the path; it should be the directory the .strings file it in
 		string languageCode = Path.GetFileName(Path.GetDirectoryName(filePath));
 
+
 		// 1) Process the strings file, pulling out all of the key-value pairs
 		// old, doesn't handle escaped quotes: "\"([^\"]+)\"\\s*=\\s*\"([^\"]+)\""
 		// new, handles escaped quotes: "([^"]+)"\s*=\s((?<![\\])['"])((?:.(?!(?<![\\])\2))*.?)\2;
-		MatchCollection matches = Regex.Matches (stringsFileAsString, "\"([^\"]+)\"\\s*=\\s((?<![\\\\])['\"])((?:.(?!(?<![\\\\])\\2))*.?)\\2;");
+		MatchCollection matches = Regex.Matches (stringsFileAsString, "\"([^\"]+)\"\\s*=\\s((?<![\\\\])['\"])((?:.(?!(?<![\\\\])\\2))*.?)\\2;", RegexOptions.Singleline);
 		foreach (Match match in matches) {
 
 			string value = match.Groups [3].Value;
@@ -272,7 +273,6 @@ public class Laurette {
 
 		return true;
 	}
-
 
 }
 

@@ -47,14 +47,20 @@ public class LauretteBuildProcess : AssetPostprocessor  {
 
 		foreach (string str in importedAssets) {
 			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings");
+			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings.txt");
+			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith ("Laurette.cs");
 		}
 		foreach (string str in deletedAssets) {
 			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings");
+			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings.txt");
 		}
 
 		for (var i = 0; i < movedAssets.Length; i++) {
 			stringsFileWasChanged = stringsFileWasChanged | movedAssets [i].EndsWith (".strings");
 			stringsFileWasChanged = stringsFileWasChanged | movedFromAssetPaths [i].EndsWith (".strings");
+
+			stringsFileWasChanged = stringsFileWasChanged | movedAssets [i].EndsWith (".strings.txt");
+			stringsFileWasChanged = stringsFileWasChanged | movedFromAssetPaths [i].EndsWith (".strings.txt");
 		}
 
 		if (stringsFileWasChanged) {
@@ -78,5 +84,7 @@ public class LauretteBuildProcess : AssetPostprocessor  {
 		laurette.Process (allStringsFiles.ToArray(), OutputDirectory+"/Localizations.cs", out error);
 
 		AssetDatabase.Refresh ();
+
+		Debug.Log ("Laurette was here");
 	}
 }
