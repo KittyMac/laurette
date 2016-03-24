@@ -48,7 +48,7 @@ public class LauretteBuildProcess : AssetPostprocessor  {
 		foreach (string str in importedAssets) {
 			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings");
 			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings.txt");
-			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith ("Laurette.cs");
+			//stringsFileWasChanged = stringsFileWasChanged | str.EndsWith ("Laurette.cs");
 		}
 		foreach (string str in deletedAssets) {
 			stringsFileWasChanged = stringsFileWasChanged | str.EndsWith (".strings");
