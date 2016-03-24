@@ -151,13 +151,18 @@ public class Laurette {
 						AppendTabFormat(sb, depth, "public static void SetLanguageCode(string codeAsString) {{ currentLanguage = (LanguageCode)System.Enum.Parse(typeof(LanguageCode), codeAsString); }}\n\n");
 
 						depth--;
-					}
+					}else{
 
+						AppendTabFormat(sb, depth+1, "/// <summary>{0}</summary>\n", branch.KeyPath);
+						AppendTabFormat(sb, depth+1, "public static string KeyPath {{ get {{ return \"{0}\"; }} }}\n", branch.KeyPath);
+					}
+						
 				} else {
 					AppendTabFormat(sb, depth, "}}\n");
 				}
 			}
 		});
+
 
 
 		sb.Length = sb.Length - 2;
@@ -313,6 +318,7 @@ public class LauretteBranch {
 	private string name;
 	private string path;
 	private string originalKey;
+	private string originalKeyPath;
 
 	private Dictionary<string,string> translations = new Dictionary<string,string>();
 
@@ -335,6 +341,12 @@ public class LauretteBranch {
 		}
 	}
 
+	public string KeyPath {
+		get {
+			return originalKeyPath;
+		}
+	}
+
 	public Dictionary<string,string> Translations {
 		get {
 			return new Dictionary<string,string> (translations);
@@ -353,8 +365,18 @@ public class LauretteBranch {
 			}
 			path = sb.ToString ();
 		}
-	}
 
+		if (keys != null) {
+			StringBuilder sb = new StringBuilder ();
+			for (int i = 0; i < keyIdx; i++) {
+				sb.Append (keys [i]);
+				sb.Append (".");
+			}
+			sb.Length = sb.Length - 1;
+			originalKeyPath = sb.ToString ();
+		}
+	}
+		
 	public void AddTranslation(string value, string languageCode){
 		translations [languageCode] = value;
 	}
