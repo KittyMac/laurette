@@ -75,7 +75,7 @@ public class LauretteBuildProcess : AssetPostprocessor  {
 		List<string> allStringsFiles = new List<string> ();
 
 		foreach (string asset in allAssets) {
-			if (asset.EndsWith (".strings") || asset.EndsWith (".strings.txt")) {
+			if (asset.Contains("Languages") && (asset.EndsWith (".strings") || asset.EndsWith (".strings.txt"))) {
 				allStringsFiles.Add (asset);
 			}
 		}
