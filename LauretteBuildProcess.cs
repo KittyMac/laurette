@@ -31,7 +31,7 @@ public class LauretteBuildProcess : AssetPostprocessor  {
 
 	static LauretteBuildProcess() {
 		// Check if the output file exists, if not we should probably try generating it!
-		if (File.Exists (OutputDirectory + "/Localizations.cs") == false) {
+		if (File.Exists (OutputDirectory + "/Standard Assets/Localizations.cs") == false) {
 			ProcessStringsFiles ();
 		}
 	}
@@ -41,7 +41,7 @@ public class LauretteBuildProcess : AssetPostprocessor  {
 		bool stringsFileWasChanged = false;
 
 		// Check if the output file exists, if not we should probably try generating it!
-		if (File.Exists (OutputDirectory + "/Localizations.cs") == false) {
+		if (File.Exists (OutputDirectory + "/Standard Assets/Localizations.cs") == false) {
 			stringsFileWasChanged = true;
 		}
 
@@ -80,8 +80,12 @@ public class LauretteBuildProcess : AssetPostprocessor  {
 			}
 		}
 
+		if (Directory.Exists (OutputDirectory + "/Standard Assets/") == false) {
+			Directory.CreateDirectory (OutputDirectory + "/Standard Assets/");
+		}
+
 		string error = null;
-		laurette.Process (allStringsFiles.ToArray(), OutputDirectory+"/Localizations.cs", out error);
+		laurette.Process (allStringsFiles.ToArray(), OutputDirectory+"/Standard Assets/Localizations.cs", out error);
 
 		AssetDatabase.Refresh ();
 
