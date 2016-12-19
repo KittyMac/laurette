@@ -21,9 +21,13 @@
 // 	SOFTWARE.
 
 using UnityEngine;
-using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
+
+
+#if UNITY_EDITOR
+
+using UnityEditor;
 
 public class LauretteBuildProcess : AssetPostprocessor  {
 
@@ -92,3 +96,5 @@ public class LauretteBuildProcess : AssetPostprocessor  {
 		Debug.Log ("Laurette was here");
 	}
 }
+
+#endif
